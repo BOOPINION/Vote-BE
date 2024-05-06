@@ -3,8 +3,8 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "./feature/auth/auth.module";
 import { VoteModule } from "./feature/vote/vote.module";
-
-
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
 
 /**
  * Root module
@@ -24,7 +24,7 @@ import { VoteModule } from "./feature/vote/vote.module";
         AuthModule,
         VoteModule
     ],
-    controllers: [],
-    providers: []
+    controllers: [ AppController ],
+    providers: [ AppService ]
 })
 export class AppModule {}
