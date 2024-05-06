@@ -5,12 +5,12 @@ import { SignupResponseDto } from "./dto/signupResponse.dto";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService) {}
 
-  @Post("signup")
-  signUp(
-    @Body() signupRequestDto: SignupRequestDto
-  ): Promise<SignupResponseDto> {
-    return this.authService.signUp(signupRequestDto);
-  }
+    @Post("signup")
+    signUp(
+        @Body() signupRequestDto: SignupRequestDto
+    ): Promise<SignupResponseDto> {
+        return this.authService.signUp(signupRequestDto);
+    }
 }
