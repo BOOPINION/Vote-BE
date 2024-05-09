@@ -22,8 +22,11 @@ export class User {
     @Column({ name: "EMAIL", type: "varchar", length: 255, nullable: false })
         email: string;
 
-    @Column({ name: "PASSWORD", type: "varchar", length: 255, nullable: false })
+    @Column({ name: "PASSWORD", type: "varchar", length: 512, nullable: false })
         password: string;
+
+    @Column({ name: "PASSWORD_SALT", type: "varchar", length: 128, nullable: false })
+        passwordSalt: string;
 
     @Column({ name: "STATUS", type: "enum", enum: [ "ADMIN", "USER", "WITHDRAW", "SLEEP" ], nullable: false })
         status: string;

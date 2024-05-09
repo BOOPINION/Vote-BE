@@ -7,7 +7,7 @@ export default function setupSwagger(app: INestApplication) {
         .setDescription("PnP 2024-01 Web Project Team API")
         .setVersion("0.0.1")
         .addTag("auth")
-        .addTag("vote")
+        .addTag("votes")
         .build();
 
     const document = SwaggerModule.createDocument(app, swagger);

@@ -9,6 +9,7 @@ export class Survey {
         id: number;
 
     @Column({ name: "AUTHOR_ID", type: "int", nullable: false })
+        authorId: number;
 
     @Column({ name: "TITLE", type: "varchar", length: 255, nullable: false })
         title: string;
