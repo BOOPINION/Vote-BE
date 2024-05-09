@@ -2,9 +2,11 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "./feature/auth/auth.module";
-import { VoteModule } from "./feature/vote/vote.module";
+import { VotesModule } from "./feature/votes/votes.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { models } from "./global/model/db";
+import { GlobalModule } from "./global/global.module";
 
 /**
  * Root module
@@ -19,10 +21,11 @@ import { AppService } from "./app.service";
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
-            entities: [ "./model/db/*" ]
+            entities: models
         }),
+        GlobalModule,
         AuthModule,
-        VoteModule
+        VotesModule
     ],
     controllers: [ AppController ],
     providers: [ AppService ]
