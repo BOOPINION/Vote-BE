@@ -8,10 +8,12 @@ import { CryptoConfig } from "@/global/config/crypto";
 @Injectable()
 export class CryptoService {
     /**
-     * Encrypt plain text with salt
+     * Encrypt plain text with salt by SHA-512.
      * @param plain plain text that will be encrypted
      * @param salt salt that will be used to encrypt the plain text
-     * @param length length of the hashed password. default is `CryptoConfig.HASHED_PASSWORD_LENGTH`
+     * @param length length of text. default is `CryptoConfig.HASHED_PASSWORD_LENGTH`.
+     * Be careful this not means output length.
+     * @returns encrypted text in base64 format with 512 byte length.
      */
     public async encrypt(plain: string, salt: string, length: number = CryptoConfig.HASHED_PASSWORD_LENGTH) {
         return new Promise<string>((resolve, reject) => {
