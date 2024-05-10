@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, OneToMany, Relation } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany, Relation, ManyToOne, JoinColumn } from "typeorm";
 import { Survey } from "./survey";
 
 @Entity("HASHTAGS")
@@ -6,13 +6,13 @@ export class Hashtag {
     @PrimaryGeneratedColumn("increment", { name: "ID", type: "int" })
         id: number;
 
-    @Column({ name: "NAME", type: "varchar", length: 255, nullable: false })
+    @Column({ name: "NAME", type: "varchar", length: 255, nullable: false, unique: true })
         name: string;
 
     @Column({ name: "CREATED_AT", type: "timestamp", nullable: false, default: "CURRENT_TIMESTAMP" })
         createdAt: Date;
 
-    @ManyToMany(() => SurveyHashtag, (survey) => survey.hashtags)
+    @OneToMany(() => SurveyHashtag, (survey) => survey.hashtag)
         surveys: Relation<SurveyHashtag>[];
 }
 
@@ -27,9 +27,12 @@ export class SurveyHashtag {
     @Column({ name: "HASHTAG_ID", type: "int", nullable: false })
         hashtagId: number;
 
-    @ManyToMany(() => Hashtag, (hashtag) => hashtag.surveys)
-        hashtags: Relation<Hashtag>[];
+    @ManyToOne(() => Hashtag, (hashtag) => hashtag.surveys, { eager: true })
+    @JoinColumn({ name: "HASHTAG_ID", referencedColumnName: "id" })
+        hashtag: Relation<Hashtag>;
 
-    @OneToMany(() => Survey, (survey) => survey.hashtags)
+    @ManyToOne(() => Survey, (survey) => survey.hashtags)
+    @JoinColumn({ name: "SURVEY_ID", referencedColumnName: "id" })
         survey: Relation<Survey>;
 }
+

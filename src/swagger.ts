@@ -10,6 +10,10 @@ export default function setupSwagger(app: INestApplication) {
         .addTag("votes")
         .build();
 
-    const document = SwaggerModule.createDocument(app, swagger);
-    SwaggerModule.setup("api", app, document);
+    const document = SwaggerModule.createDocument(app, swagger, {
+        deepScanRoutes: true
+    });
+    SwaggerModule.setup("api-docs", app, document, {
+        useGlobalPrefix: true
+    });
 }

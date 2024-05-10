@@ -42,7 +42,7 @@ export class Survey {
     @OneToMany(() => SurveyAnswer, (answer) => answer.survey)
         answers: Relation<SurveyAnswer>[];
 
-    @OneToMany(() => SurveyHashtag, (survey) => survey.hashtags)
+    @OneToMany(() => SurveyHashtag, (survey) => survey.survey)
         hashtags: Relation<SurveyHashtag>[];
 
     @OneToMany(() => SurveyLike, (like) => like.survey)
