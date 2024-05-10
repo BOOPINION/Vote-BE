@@ -19,7 +19,6 @@ export class AuthService {
         try {
             await query.connect();
             const findUser = await this.findUserByEmail(email);
-            console.log(findUser);
             if (findUser) {
                 throw new Error("사용할 수 없는 이메일입니다.");
             } else {
