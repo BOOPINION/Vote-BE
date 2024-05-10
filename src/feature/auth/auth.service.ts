@@ -12,14 +12,21 @@ export class AuthService {
         private readonly db: DataSource
     ) {}
 
-    async signUp(signupRequestDto: SignupRequestDto): Promise<SignupResponseDto> {
+    async signUp(signupRequestDto: SignupRequestDto) {
         const query = this.db.createQueryRunner();
+        const { email } = signupRequestDto;
 
         try {
             await query.connect();
-            throw new Error("Method not implemented.");
+            const findUser = await this.findUserByEmail(email);
+            console.log(findUser);
+            if (findUser) {
+                throw new Error("사용할 수 없는 이메일입니다.");
+            } else {
+                await this.createUser(signupRequestDto);
+            }
         } catch (e) {
-            throw new Error("Method not implemented.");
+            throw new Error(`Error in signUp method: ${e.message}`);
         } finally {
             await query.release();
         }
@@ -33,8 +40,8 @@ export class AuthService {
                 where: { email }
             });
             return existingUser;
-        } catch (error) {
-            throw error;
+        } catch (e) {
+            throw new Error(`Error in findUserByEmail method: ${e.message}`);
         } finally {
             await query.release();
         }
@@ -68,7 +75,7 @@ export class AuthService {
             );
             await query.manager.save(newUserPersonal);
         } catch (e) {
-            throw new e();
+            throw new Error(`Error in createUser method: ${e.message}`);
         } finally {
             await query.release();
         }

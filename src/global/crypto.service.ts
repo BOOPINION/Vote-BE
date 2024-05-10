@@ -8,14 +8,18 @@ import { CryptoConfig } from "@/global/config/crypto";
 @Injectable()
 export class CryptoService {
     /**
-     * Encrypt plain text with salt by SHA-512.
-     * @param plain plain text that will be encrypted
-     * @param salt salt that will be used to encrypt the plain text
-     * @param length length of text. default is `CryptoConfig.HASHED_PASSWORD_LENGTH`.
-     * Be careful this not means output length.
-     * @returns encrypted text in base64 format with 512 byte length.
-     */
-    public async encrypt(plain: string, salt: string, length: number = CryptoConfig.HASHED_PASSWORD_LENGTH) {
+   * Encrypt plain text with salt by SHA-512.
+   * @param plain plain text that will be encrypted
+   * @param salt salt that will be used to encrypt the plain text
+   * @param length length of text. default is `CryptoConfig.HASHED_PASSWORD_LENGTH`.
+   * Be careful this not means output length.
+   * @returns encrypted text in base64 format with 512 byte length.
+   */
+    public async encrypt(
+        plain: string,
+        salt: string,
+        length: number = CryptoConfig.HASHED_PASSWORD_LENGTH
+    ) {
         return new Promise<string>((resolve, reject) => {
             pbkdf2(plain, salt, 1024, length, "sha512", (err, derivedKey) => {
                 if (err) reject(err);
@@ -25,9 +29,11 @@ export class CryptoService {
     }
 
     /*
-    *  Generate random salt
-    */
-    public async generateSalt(length: number = CryptoConfig.SALT_LENGTH): Promise<string> {
+   *  Generate random salt
+   */
+    public async generateSalt(
+        length: number = CryptoConfig.SALT_LENGTH
+    ): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             randomBytes(length, (err, buffer) => {
                 if (err) reject(err);
