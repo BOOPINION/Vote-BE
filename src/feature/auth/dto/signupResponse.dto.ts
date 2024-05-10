@@ -1,6 +1,6 @@
 export class SignupResponseDto {
     email: string;
-    username: string;
+    name: string;
     loginToken: string;
     refreshToken: string;
 }
