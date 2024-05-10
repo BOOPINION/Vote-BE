@@ -12,7 +12,7 @@ export class AuthController {
         try {
             return this.authService.signUp(signupRequestDto);
         } catch (e) {
-            throw Error("auth error");
+            throw Error(`Error in controller signUp method: ${e.message}`);
         }
     }
 }
