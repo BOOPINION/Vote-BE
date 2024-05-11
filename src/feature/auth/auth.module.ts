@@ -7,8 +7,8 @@ import { EmailModule } from "./email/email.module";
  * Auth module
  */
 @Module({
-  imports: [EmailModule],
-  controllers: [AuthController],
-  providers: [AuthService],
+    imports: [ EmailModule ],
+    controllers: [ AuthController ],
+    providers: [ AuthService ]
 })
 export class AuthModule {}
