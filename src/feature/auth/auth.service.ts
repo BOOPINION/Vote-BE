@@ -12,7 +12,7 @@ export class AuthService {
         private readonly db: DataSource
     ) {}
 
-    async signUp(signupRequestDto: SignupRequestDto) {
+    async signUp(signupRequestDto: SignupRequestDto): Promise<void> {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
@@ -51,7 +51,10 @@ export class AuthService {
         }
     }
 
-    async createUser(query: any, signupRequestDto: SignupRequestDto) {
+    async createUser(
+        query: any,
+        signupRequestDto: SignupRequestDto
+    ): Promise<void> {
         const { name, email, password, gender, age } = signupRequestDto;
         const passwordSalt = await this.cryptoService.generateSalt();
         const encPassword = await this.cryptoService.encrypt(

@@ -7,7 +7,9 @@ export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     @Post("signup")
-    public async signUp(@Body() signupRequestDto: SignupRequestDto) {
+    public async signUp(
+        @Body() signupRequestDto: SignupRequestDto
+    ): Promise<void> {
         try {
             return this.authService.signUp(signupRequestDto);
         } catch (e) {
