@@ -7,7 +7,7 @@ import { GlobalModule } from "@/global/global.module";
  * Auth module
  */
 @Module({
-    imports: [ GlobalModule ],
+    imports: [],
     controllers: [ AuthController ],
     providers: [ AuthService ]
 })
