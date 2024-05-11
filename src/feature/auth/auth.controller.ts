@@ -5,12 +5,14 @@ import { SignupResponseDto } from "./dto/signupResponse.dto";
 
 @Controller("auth")
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private readonly authService: AuthService) {}
 
     @Post("signup")
-    signUp(
-        @Body() signupRequestDto: SignupRequestDto
-    ): Promise<SignupResponseDto> {
-        return this.authService.signUp(signupRequestDto);
+    public async signUp(@Body() signupRequestDto: SignupRequestDto) {
+        try {
+            return this.authService.signUp(signupRequestDto);
+        } catch (e) {
+            throw Error(`Error in controller signUp method: ${e.message}`);
+        }
     }
 }
