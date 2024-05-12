@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { SignupRequestDto } from "./dto/signupRequest.dto";
 import { CryptoService } from "@/global/crypto.service";
-import { DataSource } from "typeorm";
+import { DataSource, QueryRunner } from "typeorm";
 import { User, UserPersonalInfo } from "@/global/model/db/user";
 
 @Injectable()
@@ -51,7 +51,7 @@ export class AuthService {
     }
 
     async createUser(
-        query: any,
+        query: QueryRunner,
         signupRequestDto: SignupRequestDto
     ): Promise<void> {
         const { name, email, password, gender, age } = signupRequestDto;
