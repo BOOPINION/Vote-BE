@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { SignupRequestDto } from "./dto/signupRequest.dto";
-import { SignupResponseDto } from "./dto/signupResponse.dto";
 import { CryptoService } from "@/global/crypto.service";
 import { DataSource } from "typeorm";
 import { User, UserPersonalInfo } from "@/global/model/db/user";
