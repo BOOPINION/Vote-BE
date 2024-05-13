@@ -1,7 +1,7 @@
 export class SignupRequestDto {
     email: string;
-    username: string;
+    name: string;
     password: string;
-    gender: number | string;
+    gender: string;
     age: number;
 }
