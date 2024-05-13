@@ -1,6 +1,7 @@
-import { Controller, Get, HttpException, Param } from "@nestjs/common";
+import { Controller, Get, HttpException, Logger, Param } from "@nestjs/common";
 import { VoteService } from "./vote.service";
 import { DatabaseError } from "@/global/error/DatabaseError";
+import { ZeroResultError } from "@/global/error/ZeroResultError";
 
 @Controller("votes/:voteId")
 export class VoteController {
@@ -8,14 +9,19 @@ export class VoteController {
     }
     @Get()
     public async getVote(@Param("voteId") voteId: number) {
-        try {
-            return this.voteService.getVote(voteId);
-        } catch (e) {
-            if (e instanceof DatabaseError) {
-                throw new HttpException(e.message, 404);
-            } else {
-                throw new HttpException("Internal server error", 500);
-            }
+
+        const result = await this.voteService.getVote(voteId);
+
+        if (!result.success) {
+            const { error } = result;
+            Logger.error(error);
+
+            if (error instanceof DatabaseError) throw new HttpException("Database Error", 500);
+            if (error instanceof ZeroResultError) throw new HttpException("There is no vote", 404);
+            throw new HttpException("Internal Server Error", 500);
         }
+
+        return result.value;
+
     }
 }
