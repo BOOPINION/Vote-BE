@@ -19,9 +19,9 @@ export class VotesController {
             const { error } = result;
             Logger.error(error);
 
-            if (error instanceof DatabaseError) throw new HttpException("Database Error", 500);
-            if (error instanceof ZeroResultError) throw new HttpException("There is no vote", 404);
-            throw new HttpException("Internal Server Error", 500);
+            if (error instanceof DatabaseError) throw new HttpException("Database Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            if (error instanceof ZeroResultError) throw new HttpException("There is no vote", HttpStatus.NOT_FOUND);
+            throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return result.value;
