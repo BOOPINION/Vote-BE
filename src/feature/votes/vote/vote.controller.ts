@@ -1,15 +1,21 @@
-import { Controller, Get, HttpException, HttpStatus, Logger, Param } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Headers } from "@nestjs/common";
 import { VoteService } from "./vote.service";
 import { DatabaseError } from "@/global/error/DatabaseError";
 import { ZeroResultError } from "@/global/error/ZeroResultError";
+import { CreateVoteRequestDto } from "@/feature/votes/dto/CreateVoteRequest.dto";
+import { GetVoteResponseDto } from "@/feature/votes/dto/GetVoteResponse.dto";
+import { CreateVoteResponseDto } from "@/feature/votes/dto/CreateVoteResponse.dto";
+import { ApiTags } from "@nestjs/swagger";
 
-@Controller("votes/:voteId")
+@ApiTags("votes")
+@Controller("votes")
 export class VoteController {
-    public constructor(private readonly voteService: VoteService) {
-    }
-    @Get()
-    public async getVote(@Param("voteId") voteId: number) {
+    public constructor(private readonly voteService: VoteService) {}
 
+    @Get(":voteId")
+    public async getVote(
+        @Param("voteId") voteId: number
+    ): Promise<GetVoteResponseDto> {
         const result = await this.voteService.getVote(voteId);
 
         if (!result.success) {
@@ -23,5 +29,26 @@ export class VoteController {
 
         return result.value;
 
+    }
+
+    @Post("/create")
+    public async createVote(
+        @Headers("Authorization") tokenHeader: string, @Body() params: CreateVoteRequestDto
+    ): Promise<CreateVoteResponseDto> {
+        // return 401 if token not provided
+        if (!tokenHeader || !tokenHeader.startsWith("Bearer ")) throw new HttpException("Token not provided", HttpStatus.UNAUTHORIZED);
+
+        const token = tokenHeader.replace("Bearer ", "");
+
+        const result = await this.voteService.createVote(params);
+        if (!result.success) {
+            const { error } = result;
+            Logger.error(error);
+
+            if (error instanceof DatabaseError) throw new HttpException("Database Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            else throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return result.value;
     }
 }
