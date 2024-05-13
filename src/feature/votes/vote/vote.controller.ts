@@ -45,8 +45,7 @@ export class VoteController {
             const { error } = result;
             Logger.error(error);
 
-            if (error instanceof DatabaseError) throw new HttpException("Database Error", HttpStatus.INTERNAL_SERVER_ERROR);
-            else throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException("Database Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return result.value;

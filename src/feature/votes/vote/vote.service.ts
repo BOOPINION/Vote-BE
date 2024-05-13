@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { DataSource } from "typeorm";
 import { Survey, SurveyOption } from "@/global/model/db/survey";
 import { GetVoteResponseDto } from "@/feature/votes/dto/GetVoteResponse.dto";
