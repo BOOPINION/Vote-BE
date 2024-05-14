@@ -5,14 +5,14 @@ import { Injectable } from "@nestjs/common";
 export class EmailService {
     constructor(private readonly mailerService: MailerService) {}
 
-    async sendEmail() {
+    async sendCode(email: string) {
         try {
+            const code = Math.floor(Math.random() * 1000000).toString();
             await this.mailerService.sendMail({
-                to: "testEmail",
+                to: email,
                 from: process.env.MAIL_HOST,
-                subject: "test 제목",
-                text: "test 텍스트",
-                html: "<b>test<b>"
+                subject: "Verification code",
+                text: `Your verification code is ${code}`
             });
 
             return true;
