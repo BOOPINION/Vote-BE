@@ -1,5 +1,6 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { EmailService } from "./email.service";
+import { SendCodeResponseDto } from "../dto/sendCodeResponse.dto";
 
 @Controller("auth/signup/email")
 export class EmailController {
@@ -9,7 +10,9 @@ export class EmailController {
     public async emailVerify() {}
 
     @Post("code")
-    public async emailCodeSend(@Body("email") email: string) {
-        await this.emailService.sendCode(email);
+    public async emailCodeSend(
+        @Body("email") email: string
+    ): Promise<SendCodeResponseDto> {
+        return await this.emailService.sendCode(email);
     }
 }
