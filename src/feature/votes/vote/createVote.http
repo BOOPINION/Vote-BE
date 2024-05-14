@@ -1,0 +1,35 @@
+### CreateVote (/api/votes/create) endpoint test http requests
+### when token provided
+POST http://localhost:3000/api/votes/create
+Content-Type: application/json
+Authorization: Bearer asdasdasdasdasdasdasd
+
+{
+  "title": "insert test title",
+  "authorId": 1,
+  "content": "insert test content",
+  "options": [
+    "options 1",
+    "options 2"
+  ],
+  "hashtags": [
+    "h1", "h2", "inserted_tag"
+  ]
+}
+
+### when token not provided
+POST http://localhost:3000/api/votes/create
+Content-Type: application/json
+
+{
+  "title": "insert test title",
+  "authorId": 1,
+  "content": "insert test content",
+  "options": [
+    "options 1",
+    "options 2"
+  ],
+  "hashtags": [
+    "h1", "h2", "inserted_tag"
+  ]
+}
