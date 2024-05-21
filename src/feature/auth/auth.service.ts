@@ -1,14 +1,17 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { SignupRequestDto } from "./dto/signupRequest.dto";
 import { CryptoService } from "@/global/crypto.service";
 import { DataSource, QueryRunner } from "typeorm";
 import { User, UserPersonalInfo } from "@/global/model/db/user";
+import { JwtService } from '@nestjs/jwt';
+import { LoginRequestDto } from './dto/loginRequest.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly cryptoService: CryptoService,
-        private readonly db: DataSource
+        private readonly db: DataSource,
+        private jwtService: JwtService
     ) {}
 
     async signUp(signupRequestDto: SignupRequestDto): Promise<void> {
@@ -82,4 +85,37 @@ export class AuthService {
             throw new Error(`Error in createUser method: ${e.message}`);
         }
     }
+
+    async login(loginRequestDto: LoginRequestDto): Promise<{accessToken: string}>{
+        const query = this.db.createQueryRunner();
+        const {email, password} = loginRequestDto;
+
+        try{
+            await query.connect();
+            const user = await query.manager.findOne(User, {
+                where: { email }
+            });
+            if(user == null){
+                throw new UnauthorizedException('사용자가 없습니다.');
+            }
+            const EncryptedPassword = this.cryptoService.decipher(password, user);
+
+            if(!user){
+                throw new UnauthorizedException('해당 이메일을 가진 사용자를 찾을 수 없습니다.')
+            }
+            if (await EncryptedPassword != user.password) {
+                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            }
+
+            const payload = { email };
+            const accessToken = await this.jwtService.sign(payload);
+            return {accessToken};
+        } catch(e){
+            throw new Error(`Error in login method: ${e.message}`);
+        } finally {
+            await query.release();
+        }
+        
+    }
 }
+
