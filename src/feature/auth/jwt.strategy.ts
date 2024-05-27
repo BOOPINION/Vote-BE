@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { DataSource } from "typeorm";
 import { User } from "@/global/model/db/user";
 
@@ -11,18 +11,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         private readonly db: DataSource
     ) {
         super({
-            secretOrKey: 'Secret1234',
+            secretOrKey: "Secret1234",
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
         });
     }
 
-    async validate(payload: {email: any}) {
+    async validate(payload: { email: any }) {
         const queryRunner = this.db.createQueryRunner();
         try {
             await queryRunner.connect();
             const { email } = payload;
             const user = await queryRunner.manager.findOne(User, { where: { email } });
-            
+
             if (!user) {
                 throw new UnauthorizedException();
             }
