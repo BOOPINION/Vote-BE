@@ -16,7 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: { email: any }) {
+
+    async validate(payload: { email: string }) {
         const queryRunner = this.db.createQueryRunner();
         try {
             await queryRunner.connect();

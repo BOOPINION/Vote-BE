@@ -64,15 +64,16 @@ export class AuthService {
             passwordSalt
         );
         try {
-            const newUser: User = await query.manager.create(User, {
+            const newUser: User = query.manager.create(User, {
                 name,
                 email,
                 password: encPassword,
                 passwordSalt
             });
+
             await query.manager.save(newUser);
 
-            const newUserPersonal: UserPersonalInfo = await query.manager.create(
+            const newUserPersonal: UserPersonalInfo = query.manager.create(
                 UserPersonalInfo,
                 {
                     userId: newUser.id,
@@ -107,8 +108,11 @@ export class AuthService {
                 throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
             }
 
-            const payload = { email };
-            const accessToken = await this.jwtService.sign(payload);
+            const payload = { email, uid: user.id };
+            const accessToken = this.jwtService.sign(payload);
+
+            console.log(accessToken);
+
             return { accessToken };
         } catch (e) {
             throw new Error(`Error in login method: ${e.message}`);
