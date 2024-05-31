@@ -119,6 +119,23 @@ export class VoteService {
         return { success: true, value: res } as const;
     }
 
+    public async deleteVote(voteId: number) {
+        const runner = this.db.createQueryRunner();
+
+        const connect = await (doAsyncFp(runner.connect.bind(runner)));
+        if (!connect.success) return releaseWithError(runner, new DatabaseError(connect.error.message));
+
+        const result = await doAsyncFp(() => runner.manager.update(
+            Survey, { id: voteId }, { isDeleted: true }
+        ));
+        if (!result.success) return releaseWithError(runner, new DatabaseError(result.error.message));
+
+        await runner.release();
+
+        return { success: true, value: { success: true } } as const;
+
+    }
+
     private async getHashtags(hashtags: string[]): Promise<Result<Hashtag[], DatabaseError | ZeroResultError>> {
         const runner = this.db.createQueryRunner();
 

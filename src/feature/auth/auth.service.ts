@@ -3,8 +3,8 @@ import { SignupRequestDto } from "./dto/signupRequest.dto";
 import { CryptoService } from "@/global/crypto.service";
 import { DataSource, QueryRunner } from "typeorm";
 import { User, UserPersonalInfo } from "@/global/model/db/user";
-import { JwtService } from '@nestjs/jwt';
-import { LoginRequestDto } from './dto/loginRequest.dto';
+import { JwtService } from "@nestjs/jwt";
+import { LoginRequestDto } from "./dto/loginRequest.dto";
 
 @Injectable()
 export class AuthService {
@@ -64,15 +64,16 @@ export class AuthService {
             passwordSalt
         );
         try {
-            const newUser: User = await query.manager.create(User, {
+            const newUser: User = query.manager.create(User, {
                 name,
                 email,
                 password: encPassword,
                 passwordSalt
             });
+
             await query.manager.save(newUser);
 
-            const newUserPersonal: UserPersonalInfo = await query.manager.create(
+            const newUserPersonal: UserPersonalInfo = query.manager.create(
                 UserPersonalInfo,
                 {
                     userId: newUser.id,
@@ -86,36 +87,39 @@ export class AuthService {
         }
     }
 
-    async login(loginRequestDto: LoginRequestDto): Promise<{accessToken: string}>{
+    async login(loginRequestDto: LoginRequestDto): Promise<{ accessToken: string }> {
         const query = this.db.createQueryRunner();
-        const {email, password} = loginRequestDto;
+        const { email, password } = loginRequestDto;
 
-        try{
+        try {
             await query.connect();
             const user = await query.manager.findOne(User, {
                 where: { email }
             });
-            if(user == null){
-                throw new UnauthorizedException('사용자가 없습니다.');
+            if (user == null) {
+                throw new UnauthorizedException("사용자가 없습니다.");
             }
             const EncryptedPassword = this.cryptoService.decipher(password, user);
 
-            if(!user){
-                throw new UnauthorizedException('해당 이메일을 가진 사용자를 찾을 수 없습니다.')
+            if (!user) {
+                throw new UnauthorizedException("해당 이메일을 가진 사용자를 찾을 수 없습니다.");
             }
             if (await EncryptedPassword != user.password) {
-                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+                throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
             }
 
-            const payload = { email };
-            const accessToken = await this.jwtService.sign(payload);
-            return {accessToken};
-        } catch(e){
+            const payload = { email, uid: user.id };
+            const accessToken = this.jwtService.sign(payload);
+
+            console.log(accessToken);
+
+            return { accessToken };
+        } catch (e) {
             throw new Error(`Error in login method: ${e.message}`);
         } finally {
             await query.release();
         }
-        
+
     }
 }
 
