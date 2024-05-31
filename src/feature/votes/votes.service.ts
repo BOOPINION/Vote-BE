@@ -24,6 +24,9 @@ export class VotesService {
             relations: {
                 hashtags: true,
                 user: true
+            },
+            where: {
+                isDeleted: false
             }
         }));
         if (!surveys.success) return releaseWithError(query, new DatabaseError(surveys.error.message));
@@ -31,7 +34,7 @@ export class VotesService {
 
         const response = new GetVotesResponseDto();
         response.votes = surveys.value.map((s) => {
-            const cls = plainToInstance(VoteDto, pick(s, [ "id", "title", "createdAt", "lastModifiedAt" ]));
+            const cls = plainToInstance(VoteDto, pick(s, [ "id", "title", "content", "createdAt", "lastModifiedAt" ]));
             cls.author = pick(s.user, [ "id", "name" ]);
             cls.hashtags = s.hashtags.map((h) => pick(h.hashtag, [ "id", "name" ]));
             return cls;

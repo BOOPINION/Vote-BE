@@ -1,7 +1,7 @@
-import { Injectable, Param } from "@nestjs/common";
-import { randomBytes, pbkdf2 } from "crypto";
+import { Injectable } from "@nestjs/common";
+import { pbkdf2, randomBytes } from "crypto";
 import { CryptoConfig } from "@/global/config/crypto";
-import { User } from './model/db/user';
+import { User } from "./model/db/user";
 
 /**
  * Crypto service
@@ -43,11 +43,11 @@ export class CryptoService {
         });
     }
 
-    public async decipher (
-        encrypted: string, 
-        user : User
-    ){
-        return new Promise<string>(async (resolve, reject) => {
+    public async decipher(
+        encrypted: string,
+        user: User
+    ) {
+        return new Promise<string>((resolve, reject) => {
             const salt = user.passwordSalt;
             const length = CryptoConfig.HASHED_PASSWORD_LENGTH;
             pbkdf2(encrypted, salt, 1024, length, "sha512", (err, derivedKey) => {
