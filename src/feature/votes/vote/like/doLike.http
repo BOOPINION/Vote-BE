@@ -1,1 +1,0 @@
-PUT http://localhost:3000/api/votes/11/like/1

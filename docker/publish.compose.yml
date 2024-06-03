@@ -1,0 +1,28 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: vote-db
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: main
+      MYSQL_USER: main
+      MYSQL_PASSWORD: main
+    ports:
+      - "3306:3306"
+    volumes:
+      - "../docs/table-schema.sql:/docker-entrypoint-initdb.d/table-schema.sql"
+  be:
+    container_name: vote-be
+    image: vote-be
+    build:
+      context: ../
+      dockerfile: docker/nest.dockerfile
+    depends_on:
+      - db
+    env_file:
+      - ../.env
+    ports:
+      - "19990:3000"

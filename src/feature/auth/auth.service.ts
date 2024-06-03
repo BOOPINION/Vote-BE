@@ -68,6 +68,7 @@ export class AuthService {
                 name,
                 email,
                 password: encPassword,
+                status: "USER",
                 passwordSalt
             });
 
