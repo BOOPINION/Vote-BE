@@ -1,7 +1,7 @@
 FROM node:20.11.1-alpine3.19 as base
 
 # Set yarn version to 1.22.21
-RUN npm install --forcc -g yarn@1.22.21
+RUN npm install --force -g yarn@1.22.21
 
 
 FROM base as deps
