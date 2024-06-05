@@ -25,7 +25,7 @@ import { GlobalModule } from "./global/global.module";
         }),
         GlobalModule,
         AuthModule,
-        VotesModule
+        VotesModule,
     ],
     controllers: [ AppController ],
     providers: [ AppService ]

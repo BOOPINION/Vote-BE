@@ -6,7 +6,8 @@ import {
     OneToOne,
     PrimaryColumn,
     PrimaryGeneratedColumn,
-    Relation
+    Relation,
+    UpdateDateColumn
 } from "typeorm";
 import { Survey, SurveyAnswer } from "./survey";
 import { SurveyComment, SurveyLike } from "./survey-social";
@@ -45,6 +46,7 @@ export class User {
 
     @OneToMany(() => SurveyComment, (comment) => comment.user)
         comments: Relation<SurveyComment>[];
+
 }
 
 @Entity("USER_PERSONAL_INFO")

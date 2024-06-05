@@ -1,7 +1,6 @@
 import { Injectable, Param } from "@nestjs/common";
 import { randomBytes, pbkdf2 } from "crypto";
 import { CryptoConfig } from "@/global/config/crypto";
-import { User } from './model/db/user';
 
 /**
  * Crypto service
@@ -43,17 +42,13 @@ export class CryptoService {
         });
     }
 
-    public async decipher (
-        encrypted: string, 
-        user : User
-    ){
-        return new Promise<string>(async (resolve, reject) => {
-            const salt = user.passwordSalt;
-            const length = CryptoConfig.HASHED_PASSWORD_LENGTH;
-            pbkdf2(encrypted, salt, 1024, length, "sha512", (err, derivedKey) => {
-                if (err) reject(err);
-                else resolve(derivedKey.toString("base64"));
-            });
-        });
+    public generateRandomPassword(length: number = 12): string {
+        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|]}[{';
+        let password = '';
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            password += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return password;
     }
 }
