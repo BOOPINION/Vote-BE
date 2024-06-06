@@ -1,14 +1,5 @@
-import {
-    Controller,
-    Get,
-    HttpException,
-    HttpStatus,
-    Param,
-    Post,
-    Headers
-} from "@nestjs/common";
+import { Controller, Get, Headers, HttpException, HttpStatus, Param, Post } from "@nestjs/common";
 import { CommentsService } from "./comments.service";
-import { GetCommentsResponseDto } from "../dto/GetCommentsResponse.dto";
 
 @Controller("votes")
 export class CommentsController {

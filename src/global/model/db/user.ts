@@ -45,6 +45,7 @@ export class User {
 
     @OneToMany(() => SurveyComment, (comment) => comment.user)
         comments: Relation<SurveyComment>[];
+
 }
 
 @Entity("USER_PERSONAL_INFO")
