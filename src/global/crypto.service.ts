@@ -1,5 +1,5 @@
-import { Injectable, Param } from "@nestjs/common";
-import { randomBytes, pbkdf2 } from "crypto";
+import { Injectable } from "@nestjs/common";
+import { pbkdf2, randomBytes } from "crypto";
 import { CryptoConfig } from "@/global/config/crypto";
 
 /**
@@ -43,8 +43,8 @@ export class CryptoService {
     }
 
     public generateRandomPassword(length: number = 12): string {
-        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|]}[{';
-        let password = '';
+        const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|]}[{";
+        let password = "";
         const charactersLength = characters.length;
         for (let i = 0; i < length; i++) {
             password += characters.charAt(Math.floor(Math.random() * charactersLength));

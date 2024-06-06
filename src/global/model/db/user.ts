@@ -6,8 +6,7 @@ import {
     OneToOne,
     PrimaryColumn,
     PrimaryGeneratedColumn,
-    Relation,
-    UpdateDateColumn
+    Relation
 } from "typeorm";
 import { Survey, SurveyAnswer } from "./survey";
 import { SurveyComment, SurveyLike } from "./survey-social";

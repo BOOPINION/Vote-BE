@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Headers } from "@nestjs/common";
+import { Body, Controller, Get, Headers, HttpException, HttpStatus, Logger, Param, Post } from "@nestjs/common";
 import { VoteService } from "./vote.service";
 import { DatabaseError } from "@/global/error/DatabaseError";
 import { ZeroResultError } from "@/global/error/ZeroResultError";

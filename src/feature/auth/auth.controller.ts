@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Put, Param, Post, Delete, UnprocessableEntityException, UseGuards, Req, Query } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupRequestDto } from "./dto/signupRequest.dto";
-import { LoginRequestDto } from './dto/loginRequest.dto';
-import { DeleteUserRequestDto } from './dto/deleteUserRequest.dto';
-import { JwtAuthGuard } from '../../global/jwt-auth.guard';
-import { ChangePasswordRequestDto } from './dto/changePasswordRequest.dto';
-import { ResetPasswordRequestDto } from './dto/resetPasswordRequest.dto';
+import { LoginRequestDto } from "./dto/loginRequest.dto";
+import { DeleteUserRequestDto } from "./dto/deleteUserRequest.dto";
+import { JwtAuthGuard } from "../../global/jwt-auth.guard";
+import { ChangePasswordRequestDto } from "./dto/changePasswordRequest.dto";
+import { ResetPasswordRequestDto } from "./dto/resetPasswordRequest.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -25,7 +25,7 @@ export class AuthController {
     @Post("/login")
     public async login(
         @Body() loginRequestDto: LoginRequestDto
-    ): Promise<{accessToken: string}> {
+    ): Promise<{ accessToken: string }> {
         try {
             return this.authService.login(loginRequestDto);
         } catch (e) {
@@ -33,7 +33,7 @@ export class AuthController {
         }
     }
 
-    @Post('user/change-password')
+    @Post("user/change-password")
     @UseGuards(JwtAuthGuard)
     async changePassword(
         @Body() changePasswordRequestDto: ChangePasswordRequestDto
@@ -45,7 +45,7 @@ export class AuthController {
         }
     }
 
-    @Post('pw/reset')
+    @Post("pw/reset")
     @UseGuards(JwtAuthGuard)
     async resetPassword(
         @Body() resetPasswordRequestDto: ResetPasswordRequestDto
@@ -57,7 +57,7 @@ export class AuthController {
         }
     }
 
-    @Post('user/withdraw')
+    @Post("user/withdraw")
     @UseGuards(JwtAuthGuard)
     async deleteUser(
         @Body() deleteUserRequestDto: DeleteUserRequestDto
