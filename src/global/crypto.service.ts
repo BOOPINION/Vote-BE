@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { pbkdf2, randomBytes } from "crypto";
 import { CryptoConfig } from "@/global/config/crypto";
-import { User } from './model/db/user';
 
 /**
  * Crypto service

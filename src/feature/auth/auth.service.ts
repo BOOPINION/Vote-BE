@@ -69,7 +69,7 @@ export class AuthService {
             passwordSalt
         );
         try {
-            const newUser: User = await query.manager.create(User, {
+            const newUser: User = query.manager.create(User, {
                 name,
                 email,
                 password: encPassword,
@@ -77,7 +77,7 @@ export class AuthService {
             });
             await query.manager.save(newUser);
 
-            const newUserPersonal: UserPersonalInfo = await query.manager.create(
+            const newUserPersonal: UserPersonalInfo = query.manager.create(
                 UserPersonalInfo,
                 {
                     userId: newUser.id,
@@ -114,7 +114,7 @@ export class AuthService {
             }
 
             const payload = { email };
-            const accessToken = await this.jwtService.sign(payload);
+            const accessToken = this.jwtService.sign(payload);
             return { accessToken };
         } catch (e) {
             throw new Error(`Error in login method: ${e.message}`);
@@ -166,7 +166,7 @@ export class AuthService {
         try {
             await query.connect();
             await query.startTransaction();
-            const { email, password } = resetPasswordRequestDto;
+            const { email } = resetPasswordRequestDto;
 
             const user = await query.manager.findOne(User, {
                 where: { email }

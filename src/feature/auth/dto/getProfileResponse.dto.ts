@@ -3,7 +3,7 @@ export class GetProfileResponseDto {
     email: string;
     username: string;
     personalInfo: {
-        gender: string | null;
-        age: number | null;
+        gender: string | null,
+        age: number | null
     } | null;
 }

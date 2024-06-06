@@ -29,7 +29,6 @@ export class UserController {
         @Body() updateProfileDto: UpdateProfileRequestDto
     ): Promise<void> {
         try {
-            const email = updateProfileDto.email;
             return this.userService.updateProfile(updateProfileDto);
         } catch (e) {
             throw Error(`Error in controller updateProfile method: ${e.message}`);

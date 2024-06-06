@@ -1,7 +1,5 @@
-import { SurveyComment } from "@/global/model/db/survey-social";
 import { Injectable } from "@nestjs/common";
 import { DataSource } from "typeorm";
-import { GetCommentsResponseDto } from "../dto/GetCommentsResponse.dto";
 
 @Injectable()
 export class CommentsService {

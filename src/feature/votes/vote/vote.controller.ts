@@ -6,7 +6,6 @@ import { CreateVoteRequestDto } from "@/feature/votes/dto/CreateVoteRequest.dto"
 import { GetVoteResponseDto } from "@/feature/votes/dto/GetVoteResponse.dto";
 import { CreateVoteResponseDto } from "@/feature/votes/dto/CreateVoteResponse.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { DeleteVoteResponseDto } from "@/feature/votes/dto/DeleteVoteResponse.dto";
 
 @ApiTags("votes")
 @Controller("votes")
@@ -36,27 +35,7 @@ export class VoteController {
     public async createVote(
         @Headers("Authorization") tokenHeader: string, @Body() params: CreateVoteRequestDto
     ): Promise<CreateVoteResponseDto> {
-        // return 401 if token not provided
-        if (!tokenHeader || !tokenHeader.startsWith("Bearer ")) throw new HttpException("Token not provided", HttpStatus.UNAUTHORIZED);
-
-        const token = tokenHeader.replace("Bearer ", "");
-
         const result = await this.voteService.createVote(params);
-        if (!result.success) {
-            const { error } = result;
-            Logger.error(error);
-
-            throw new HttpException("Database Error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return result.value;
-    }
-
-    @Delete(":voteId")
-    public async deleteVote(
-        @Headers("Authorization") tokenHeader: string,  @Param("voteId") voteId: number
-    ): Promise<DeleteVoteResponseDto> {
-        const result = await this.voteService.deleteVote(voteId);
         if (!result.success) {
             const { error } = result;
             Logger.error(error);
