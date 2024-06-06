@@ -5,13 +5,18 @@ import { DataSource, QueryRunner } from "typeorm";
 import { User, UserPersonalInfo } from "@/global/model/db/user";
 import { JwtService } from "@nestjs/jwt";
 import { LoginRequestDto } from "./dto/loginRequest.dto";
+import { ChangePasswordRequestDto } from "./dto/changePasswordRequest.dto";
+import { MailerService } from "@nestjs-modules/mailer";
+import { DeleteUserRequestDto } from "./dto/deleteUserRequest.dto";
+import { ResetPasswordRequestDto } from "./dto/resetPasswordRequest.dto";
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly cryptoService: CryptoService,
         private readonly db: DataSource,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private readonly mailerService: MailerService
     ) {}
 
     async signUp(signupRequestDto: SignupRequestDto): Promise<void> {
@@ -70,7 +75,6 @@ export class AuthService {
                 password: encPassword,
                 passwordSalt
             });
-
             await query.manager.save(newUser);
 
             const newUserPersonal: UserPersonalInfo = query.manager.create(
@@ -90,36 +94,133 @@ export class AuthService {
     async login(loginRequestDto: LoginRequestDto): Promise<{ accessToken: string }> {
         const query = this.db.createQueryRunner();
         const { email, password } = loginRequestDto;
-
         try {
             await query.connect();
             const user = await query.manager.findOne(User, {
                 where: { email }
             });
-            if (user == null) {
-                throw new UnauthorizedException("사용자가 없습니다.");
-            }
-            const EncryptedPassword = this.cryptoService.decipher(password, user);
-
             if (!user) {
                 throw new UnauthorizedException("해당 이메일을 가진 사용자를 찾을 수 없습니다.");
             }
-            if (await EncryptedPassword != user.password) {
+
+            /* const EncryptedPassword = await this.cryptoService.decipher(password, user);
+            if ( EncryptedPassword != user.password) {
+                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            }*/
+
+            const encryptedPassword = await this.cryptoService.encrypt(password, user.passwordSalt);
+            if (encryptedPassword !== user.password) {
                 throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
             }
 
-            const payload = { email, uid: user.id };
+            const payload = { email };
             const accessToken = this.jwtService.sign(payload);
-
-            console.log(accessToken);
-
             return { accessToken };
         } catch (e) {
             throw new Error(`Error in login method: ${e.message}`);
         } finally {
             await query.release();
         }
+    }
 
+    async changePassword(changePasswordRequestDto: ChangePasswordRequestDto): Promise<void> {
+        const query = this.db.createQueryRunner();
+        try {
+            await query.connect();
+            await query.startTransaction();
+
+            const { email, exPassword, newPassword } = changePasswordRequestDto;
+
+            const user = await query.manager.findOne(User, {
+                where: { email }
+            });
+            if (!user) {
+                throw new UnauthorizedException("해당 이메일을 가진 사용자를 찾을 수 없습니다.");
+            }
+
+            const encryptedExPassword = await this.cryptoService.encrypt(exPassword, user.passwordSalt);
+            console.log(encryptedExPassword);
+            console.log(user.password);
+            if (encryptedExPassword !== user.password) {
+                throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
+            }
+
+            const newPasswordSalt = await this.cryptoService.generateSalt();
+            const encryptedNewPassword = await this.cryptoService.encrypt(newPassword, newPasswordSalt);
+
+            user.password = encryptedNewPassword;
+            user.passwordSalt = newPasswordSalt;
+
+            await query.manager.save(user);
+            await query.commitTransaction();
+        } catch (e) {
+            await query.rollbackTransaction();
+            throw new Error(`Error in changePassword method: ${e.message}`);
+        } finally {
+            await query.release();
+        }
+    }
+
+    async resetPassword(resetPasswordRequestDto: ResetPasswordRequestDto): Promise<string> {
+        const query = this.db.createQueryRunner();
+        try {
+            await query.connect();
+            await query.startTransaction();
+            const { email } = resetPasswordRequestDto;
+
+            const user = await query.manager.findOne(User, {
+                where: { email }
+            });
+            if (!user) {
+                throw new UnauthorizedException("사용자를 찾을 수 없습니다.");
+            }
+
+            const temporaryPassword = this.cryptoService.generateRandomPassword();
+            const newPasswordSalt = await this.cryptoService.generateSalt();
+            const encryptedNewPassword = await this.cryptoService.encrypt(temporaryPassword, newPasswordSalt);
+
+            user.password = encryptedNewPassword;
+            user.passwordSalt = newPasswordSalt;
+
+            await query.manager.save(user);
+
+            await query.commitTransaction();
+
+            return temporaryPassword;
+        } catch (e) {
+            await query.rollbackTransaction();
+            throw new Error(`Error in resetPassword method: ${e.message}`);
+        } finally {
+            await query.release();
+        }
+    }
+
+    async deleteUser(deleteUserRequestDto: DeleteUserRequestDto): Promise<void> {
+        const query = this.db.createQueryRunner();
+        try {
+            await query.connect();
+            await query.startTransaction();
+
+            const user = await query.manager.findOne(User, {
+                where: { email: deleteUserRequestDto.email }
+            });
+            if (!user) {
+                throw new UnauthorizedException("사용자를 찾을 수 없습니다.");
+            }
+
+            const encryptedPassword = this.cryptoService.encrypt(deleteUserRequestDto.password, user.passwordSalt);
+            if (await encryptedPassword !== user.password) {
+                throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
+            }
+
+            await query.manager.remove(user);
+            await query.commitTransaction();
+        } catch (e) {
+            await query.rollbackTransaction();
+            throw new Error(`Error in deleteUser method: ${e.message}`);
+        } finally {
+            await query.release();
+        }
     }
 }
 

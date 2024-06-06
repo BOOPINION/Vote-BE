@@ -4,14 +4,16 @@ import { AuthService } from "./auth.service";
 import { EmailModule } from "./email/email.module";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { JwtStrategy } from "./jwt.strategy";
+import { JwtStrategy } from "../../global/jwt.strategy";
 import { GlobalModule } from "@/global/global.module";
+import { UserModule } from "./user/user.module";
 
 /**
  * Auth module
  */
 @Module({
     imports: [ EmailModule,
+        UserModule,
         GlobalModule,
         PassportModule.register({ defaultStrategy: "jwt" }),
         JwtModule.register({
