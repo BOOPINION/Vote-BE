@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Headers, HttpException, HttpStatus, Logger, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Headers, HttpException, HttpStatus, Logger, Param, Post } from "@nestjs/common";
 import { VoteService } from "./vote.service";
 import { DatabaseError } from "@/global/error/DatabaseError";
 import { ZeroResultError } from "@/global/error/ZeroResultError";
@@ -36,6 +36,11 @@ export class VoteController {
     public async createVote(
         @Headers("Authorization") tokenHeader: string, @Body() params: CreateVoteRequestDto
     ): Promise<CreateVoteResponseDto> {
+        // return 401 if token not provided
+        if (!tokenHeader || !tokenHeader.startsWith("Bearer ")) throw new HttpException("Token not provided", HttpStatus.UNAUTHORIZED);
+
+        const token = tokenHeader.replace("Bearer ", "");
+
         const result = await this.voteService.createVote(params);
         if (!result.success) {
             const { error } = result;
