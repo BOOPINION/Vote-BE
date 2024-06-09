@@ -1,13 +1,16 @@
 import { MailerService } from "@nestjs-modules/mailer";
 import { Injectable } from "@nestjs/common";
-import { SendCodeResponseDto } from "./dto/sendCodeResponse.dto";
 import { EmailVerifyRequestDto } from "./dto/emailVerifyRequest.dto";
+import { CodeStore } from "./codestore";
 
 @Injectable()
 export class EmailService {
-    constructor(private readonly mailerService: MailerService) {}
+    constructor(
+        private readonly mailerService: MailerService,
+        private readonly codestore: CodeStore
+    ) {}
 
-    async sendCode(email: string): Promise<SendCodeResponseDto> {
+    async sendCode(email: string): Promise<void> {
         try {
             const code = Math.floor(Math.random() * 1000000).toString();
             await this.mailerService.sendMail({
@@ -17,14 +20,7 @@ export class EmailService {
                 text: `Your verification code is ${code}`
             });
 
-            const state: SendCodeResponseDto = {
-                email,
-                state: {
-                    code,
-                    verified: false
-                }
-            };
-            return state;
+            this.codestore.saveCode(email, code);
         } catch (e) {
             throw new Error(`Error in sendEmail method: ${e.message}`);
         }
@@ -34,8 +30,15 @@ export class EmailService {
         emailVerifyRequestDto: EmailVerifyRequestDto
     ): Promise<boolean> {
         try {
-            const { state, verifyCode } = emailVerifyRequestDto;
-            if (state.code === verifyCode) {
+            const { email, state } = emailVerifyRequestDto;
+            const storedCode = this.codestore.getCode(email);
+
+            if (!storedCode) {
+                throw new Error("인증 코드를 찾을 수 없습니다.");
+            }
+
+            if (state.code === storedCode) {
+                this.codestore.removeCode(email);
                 state.verified = true;
             } else {
                 throw new Error("일치하지 않은 코드입니다.");

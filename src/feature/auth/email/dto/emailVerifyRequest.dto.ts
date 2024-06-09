@@ -4,5 +4,4 @@ export class EmailVerifyRequestDto {
         code: string,
         verified: boolean
     };
-    verifyCode: string;
 }
