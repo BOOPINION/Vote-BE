@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    UnauthorizedException
+} from "@nestjs/common";
 import { SignupRequestDto } from "./dto/signupRequest.dto";
 import { CryptoService } from "@/global/crypto.service";
 import { DataSource, QueryRunner } from "typeorm";
@@ -9,6 +14,7 @@ import { ChangePasswordRequestDto } from "./dto/changePasswordRequest.dto";
 import { MailerService } from "@nestjs-modules/mailer";
 import { DeleteUserRequestDto } from "./dto/deleteUserRequest.dto";
 import { ResetPasswordRequestDto } from "./dto/resetPasswordRequest.dto";
+import { SignupResponseDto } from "./dto/signupResponse.dto";
 
 @Injectable()
 export class AuthService {
@@ -19,7 +25,7 @@ export class AuthService {
         private readonly mailerService: MailerService
     ) {}
 
-    async signUp(signupRequestDto: SignupRequestDto): Promise<void> {
+    async signUp(signupRequestDto: SignupRequestDto): Promise<SignupResponseDto> {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
@@ -27,17 +33,25 @@ export class AuthService {
 
             const { email } = signupRequestDto;
             const findUser = await this.findUserByEmail(email);
+            const res = new SignupResponseDto();
 
             if (findUser) {
-                throw new Error("사용할 수 없는 이메일입니다.");
+                throw new HttpException(
+                    "사용할 수 없는 이메일입니다.",
+                    HttpStatus.BAD_REQUEST
+                );
             } else {
-                await this.createUser(query, signupRequestDto);
+                res.userId = await this.createUser(query, signupRequestDto);
+                res.success = true;
             }
-
             await query.commitTransaction();
+            return res;
         } catch (e) {
             await query.rollbackTransaction();
-            throw new Error(`Error in signUp method: ${e.message}`);
+            throw new HttpException(
+                `Error in signUp method: ${e.message}`,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
         } finally {
             await query.release();
         }
@@ -61,7 +75,7 @@ export class AuthService {
     async createUser(
         query: QueryRunner,
         signupRequestDto: SignupRequestDto
-    ): Promise<void> {
+    ): Promise<number> {
         const { name, email, password, gender, age } = signupRequestDto;
         const passwordSalt = await this.cryptoService.generateSalt();
         const encPassword = await this.cryptoService.encrypt(
@@ -86,12 +100,15 @@ export class AuthService {
                 }
             );
             await query.manager.save(newUserPersonal);
+            return newUser.id;
         } catch (e) {
             throw new Error(`Error in createUser method: ${e.message}`);
         }
     }
 
-    async login(loginRequestDto: LoginRequestDto): Promise<{ accessToken: string }> {
+    async login(
+        loginRequestDto: LoginRequestDto
+    ): Promise<{ accessToken: string }> {
         const query = this.db.createQueryRunner();
         const { email, password } = loginRequestDto;
         try {
@@ -100,7 +117,9 @@ export class AuthService {
                 where: { email }
             });
             if (!user) {
-                throw new UnauthorizedException("해당 이메일을 가진 사용자를 찾을 수 없습니다.");
+                throw new UnauthorizedException(
+                    "해당 이메일을 가진 사용자를 찾을 수 없습니다."
+                );
             }
 
             /* const EncryptedPassword = await this.cryptoService.decipher(password, user);
@@ -108,7 +127,10 @@ export class AuthService {
                 throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
             }*/
 
-            const encryptedPassword = await this.cryptoService.encrypt(password, user.passwordSalt);
+            const encryptedPassword = await this.cryptoService.encrypt(
+                password,
+                user.passwordSalt
+            );
             if (encryptedPassword !== user.password) {
                 throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
             }
@@ -123,7 +145,9 @@ export class AuthService {
         }
     }
 
-    async changePassword(changePasswordRequestDto: ChangePasswordRequestDto): Promise<void> {
+    async changePassword(
+        changePasswordRequestDto: ChangePasswordRequestDto
+    ): Promise<void> {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
@@ -135,10 +159,15 @@ export class AuthService {
                 where: { email }
             });
             if (!user) {
-                throw new UnauthorizedException("해당 이메일을 가진 사용자를 찾을 수 없습니다.");
+                throw new UnauthorizedException(
+                    "해당 이메일을 가진 사용자를 찾을 수 없습니다."
+                );
             }
 
-            const encryptedExPassword = await this.cryptoService.encrypt(exPassword, user.passwordSalt);
+            const encryptedExPassword = await this.cryptoService.encrypt(
+                exPassword,
+                user.passwordSalt
+            );
             console.log(encryptedExPassword);
             console.log(user.password);
             if (encryptedExPassword !== user.password) {
@@ -146,7 +175,10 @@ export class AuthService {
             }
 
             const newPasswordSalt = await this.cryptoService.generateSalt();
-            const encryptedNewPassword = await this.cryptoService.encrypt(newPassword, newPasswordSalt);
+            const encryptedNewPassword = await this.cryptoService.encrypt(
+                newPassword,
+                newPasswordSalt
+            );
 
             user.password = encryptedNewPassword;
             user.passwordSalt = newPasswordSalt;
@@ -161,7 +193,9 @@ export class AuthService {
         }
     }
 
-    async resetPassword(resetPasswordRequestDto: ResetPasswordRequestDto): Promise<string> {
+    async resetPassword(
+        resetPasswordRequestDto: ResetPasswordRequestDto
+    ): Promise<string> {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
@@ -177,7 +211,10 @@ export class AuthService {
 
             const temporaryPassword = this.cryptoService.generateRandomPassword();
             const newPasswordSalt = await this.cryptoService.generateSalt();
-            const encryptedNewPassword = await this.cryptoService.encrypt(temporaryPassword, newPasswordSalt);
+            const encryptedNewPassword = await this.cryptoService.encrypt(
+                temporaryPassword,
+                newPasswordSalt
+            );
 
             user.password = encryptedNewPassword;
             user.passwordSalt = newPasswordSalt;
@@ -208,8 +245,11 @@ export class AuthService {
                 throw new UnauthorizedException("사용자를 찾을 수 없습니다.");
             }
 
-            const encryptedPassword = this.cryptoService.encrypt(deleteUserRequestDto.password, user.passwordSalt);
-            if (await encryptedPassword !== user.password) {
+            const encryptedPassword = this.cryptoService.encrypt(
+                deleteUserRequestDto.password,
+                user.passwordSalt
+            );
+            if ((await encryptedPassword) !== user.password) {
                 throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
             }
 
@@ -223,4 +263,3 @@ export class AuthService {
         }
     }
 }
-

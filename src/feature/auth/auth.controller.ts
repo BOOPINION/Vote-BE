@@ -6,6 +6,7 @@ import { DeleteUserRequestDto } from "./dto/deleteUserRequest.dto";
 import { JwtAuthGuard } from "../../global/jwt-auth.guard";
 import { ChangePasswordRequestDto } from "./dto/changePasswordRequest.dto";
 import { ResetPasswordRequestDto } from "./dto/resetPasswordRequest.dto";
+import { SignupResponseDto } from "./dto/signupResponse.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -14,7 +15,7 @@ export class AuthController {
     @Post("signup")
     public async signUp(
         @Body() signupRequestDto: SignupRequestDto
-    ): Promise<void> {
+    ): Promise<SignupResponseDto> {
         try {
             return this.authService.signUp(signupRequestDto);
         } catch (e) {
