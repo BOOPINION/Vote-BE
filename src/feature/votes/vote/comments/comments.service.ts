@@ -2,13 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { DataSource } from "typeorm";
 import { CreateCommentRequestDto } from "./dto/CreateCommentsRequest.dto";
 import { SurveyComment } from "@/global/model/db/survey-social";
-import { CommentsDto } from "./dto/GetCommentsResponse.dto";
+import {
+  CommentsDto,
+  GetCommentsResponseDto,
+} from "./dto/GetCommentsResponse.dto";
 
 @Injectable()
 export class CommentsService {
   constructor(private readonly db: DataSource) {}
 
-  public async getComments(voteId: number) {
+  public async getComments(voteId: number): Promise<GetCommentsResponseDto> {
     const query = this.db.createQueryRunner();
     try {
       await query.connect();
@@ -41,6 +44,7 @@ export class CommentsService {
     const query = this.db.createQueryRunner();
     const { authorId, content } = createCommentRequestDto;
     try {
+      await query.connect();
       const newComment: SurveyComment = query.manager.create(SurveyComment, {
         surveyId: voteId,
         authorId,
@@ -52,6 +56,25 @@ export class CommentsService {
       throw new Error(`Error in createComment method: ${e.message}`);
     } finally {
       await query.release();
+    }
+  }
+
+  public async deleteComment(
+    voteId: number,
+    commentId: number
+  ): Promise<boolean> {
+    const query = this.db.createQueryRunner();
+    try {
+      await query.connect();
+      const result = await query.manager.delete(SurveyComment, {
+        surveyId: voteId,
+        id: commentId,
+      });
+      return result.affected ? true : false;
+    } catch (e) {
+      throw new Error(`Error in deleteComment method: ${e.message}`);
+    } finally {
+      query.release();
     }
   }
 }

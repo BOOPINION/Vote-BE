@@ -1,4 +1,4 @@
 export class CreateCommentRequestDto {
-    authorId: number;
-    content: string;
+  authorId: number;
+  content: string;
 }
