@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Patch, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { GetProfileResponseDto } from "../dto/getProfileResponse.dto";
-import { UpdateProfileRequestDto } from "../dto/updateProfileRequest.dto";
 import { JwtAuthGuard } from "../../../global/jwt-auth.guard";
-import { GetProfileRequestDto } from "../dto/getProfileRequest.dto";
+import { User } from '@/global/model/db/user';
+import { GetUser } from './get-user.decorator';
+import { UpdateProfileRequestDto } from '../dto/updateProfileRequest.dto';
 
 @Controller("auth")
 export class UserController {
@@ -13,11 +14,9 @@ export class UserController {
 
     @Get("/user")
     @UseGuards(JwtAuthGuard)
-    public async getProfile(
-        @Body() getProfileRequestDto: GetProfileRequestDto
-    ): Promise<GetProfileResponseDto> {
+    public async getProfile( @GetUser() user: User): Promise<GetProfileResponseDto> {
         try {
-            return this.userService.getProfile(getProfileRequestDto);
+            return this.userService.getProfile(user);
         } catch (e) {
             throw Error(`Error in controller getProfile method: ${e.message}`);
         }
@@ -26,10 +25,11 @@ export class UserController {
     @Patch("user/update")
     @UseGuards(JwtAuthGuard)
     public async updateProfile(
-        @Body() updateProfileDto: UpdateProfileRequestDto
-    ): Promise<void> {
+        @GetUser() user: User, 
+        @Body()updateProfileRequestDto : UpdateProfileRequestDto
+    ): Promise<{ success: boolean }> {
         try {
-            return this.userService.updateProfile(updateProfileDto);
+            return this.userService.updateProfile(user, updateProfileRequestDto);
         } catch (e) {
             throw Error(`Error in controller updateProfile method: ${e.message}`);
         }

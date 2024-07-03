@@ -3,7 +3,7 @@ import { DataSource } from "typeorm";
 import { User } from "@/global/model/db/user";
 import { GetProfileResponseDto } from "../dto/getProfileResponse.dto";
 import { UpdateProfileRequestDto } from "../dto/updateProfileRequest.dto";
-import { GetProfileRequestDto } from "../dto/getProfileRequest.dto";
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
@@ -11,22 +11,21 @@ export class UserService {
         private readonly db: DataSource
     ) {}
 
-    async getProfile(getProfileRequestDto: GetProfileRequestDto): Promise<GetProfileResponseDto> {
-        const query = this.db.createQueryRunner();
+    async getProfile(user: User): Promise<GetProfileResponseDto> {
         try {
-            await query.connect();
-
-            const user = await query.manager.findOne(User, {
-                where: { email: getProfileRequestDto.email },
-                relations: [ "personalInfo" ]
+            const userWithInfo = await this.db.manager.findOne(User, {
+                where: {
+                    id: user.id
+                },
+                relations: ["personalInfo"]
             });
 
-            if (!user) {
+            if (!userWithInfo) {
                 throw new Error("사용자를 찾을 수 없습니다.");
             }
 
-            const { id, email, name: username } = user;
-            const personalInfo = user.personalInfo;
+            const { id, email, name: username } = userWithInfo;
+            const personalInfo = userWithInfo.personalInfo;
 
             const profileResponse: GetProfileResponseDto = {
                 id,
@@ -46,32 +45,45 @@ export class UserService {
 
         } catch (e) {
             throw new Error(`Error in getProfile method: ${e.message}`);
-        } finally {
-            await query.release();
         }
     }
 
-    async updateProfile(updateProfileDto: UpdateProfileRequestDto): Promise<void> {
+    async updateProfile(user: User, updateProfileRequestDto: UpdateProfileRequestDto): Promise<{ success: boolean }> {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
+            await query.startTransaction();
 
-            const user = await query.manager.findOne(User, {
-                where: { email: updateProfileDto.email },
+            const userInfo = await query.manager.findOne(User, {
+                where: {
+                    id: user.id
+                },
                 relations: [ "personalInfo" ]
             });
 
-            if (!user) {
+            if (!userInfo) {
                 throw new Error("사용자를 찾을 수 없습니다.");
             }
 
-            if (updateProfileDto.username) {
-                user.name = updateProfileDto.username;
+            if (updateProfileRequestDto.username) {
+                userInfo.name = updateProfileRequestDto.username;
             }
 
-            await query.manager.save(user);
+            if (updateProfileRequestDto.gender) {
+                userInfo.personalInfo.gender = updateProfileRequestDto.gender;
+            }
+            if (updateProfileRequestDto.age) {
+                userInfo.personalInfo.age = updateProfileRequestDto.age;
+            }
 
+            await query.manager.save(userInfo);
+            await query.manager.save(userInfo.personalInfo);
+
+            await query.commitTransaction();
+
+            return { success: true };
         } catch (e) {
+            await query.rollbackTransaction();
             throw new Error(`Error in updateProfile method: ${e.message}`);
         } finally {
             await query.release();

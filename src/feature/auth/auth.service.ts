@@ -5,9 +5,9 @@ import {
     UnauthorizedException
 } from "@nestjs/common";
 import { SignupRequestDto } from "./dto/signupRequest.dto";
-import { CryptoService } from "@/global/crypto.service";
 import { DataSource, QueryRunner } from "typeorm";
-import { User, UserPersonalInfo } from "@/global/model/db/user";
+import { CryptoService } from "@/global/crypto.service";
+import { User, UserPersonalInfo } from '@/global/model/db/user';
 import { JwtService } from "@nestjs/jwt";
 import { LoginRequestDto } from "./dto/loginRequest.dto";
 import { ChangePasswordRequestDto } from "./dto/changePasswordRequest.dto";
@@ -15,6 +15,7 @@ import { MailerService } from "@nestjs-modules/mailer";
 import { DeleteUserRequestDto } from "./dto/deleteUserRequest.dto";
 import { ResetPasswordRequestDto } from "./dto/resetPasswordRequest.dto";
 import { SignupResponseDto } from "./dto/signupResponse.dto";
+import { LoginResponseDto } from './dto/loginResponse.dto';
 
 @Injectable()
 export class AuthService {
@@ -108,7 +109,7 @@ export class AuthService {
 
     async login(
         loginRequestDto: LoginRequestDto
-    ): Promise<{ accessToken: string }> {
+    ): Promise<LoginResponseDto> {
         const query = this.db.createQueryRunner();
         const { email, password } = loginRequestDto;
         try {
@@ -122,11 +123,6 @@ export class AuthService {
                 );
             }
 
-            /* const EncryptedPassword = await this.cryptoService.decipher(password, user);
-            if ( EncryptedPassword != user.password) {
-                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
-            }*/
-
             const encryptedPassword = await this.cryptoService.encrypt(
                 password,
                 user.passwordSalt
@@ -137,7 +133,15 @@ export class AuthService {
 
             const payload = { email };
             const accessToken = this.jwtService.sign(payload);
-            return { accessToken };
+
+            const loginResponseDto: LoginResponseDto = {
+                userId: user.id,
+                username: user.name,
+                email: user.email,
+                loginToken: accessToken
+            };
+    
+            return loginResponseDto;
         } catch (e) {
             throw new Error(`Error in login method: ${e.message}`);
         } finally {
@@ -147,7 +151,7 @@ export class AuthService {
 
     async changePassword(
         changePasswordRequestDto: ChangePasswordRequestDto
-    ): Promise<void> {
+    ): Promise< { success: boolean } > {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
@@ -185,6 +189,8 @@ export class AuthService {
 
             await query.manager.save(user);
             await query.commitTransaction();
+
+            return { success: true };
         } catch (e) {
             await query.rollbackTransaction();
             throw new Error(`Error in changePassword method: ${e.message}`);
@@ -232,7 +238,7 @@ export class AuthService {
         }
     }
 
-    async deleteUser(deleteUserRequestDto: DeleteUserRequestDto): Promise<void> {
+    async deleteUser(deleteUserRequestDto: DeleteUserRequestDto): Promise< { success: boolean } > {
         const query = this.db.createQueryRunner();
         try {
             await query.connect();
@@ -255,6 +261,7 @@ export class AuthService {
 
             await query.manager.remove(user);
             await query.commitTransaction();
+            return { success: true };
         } catch (e) {
             await query.rollbackTransaction();
             throw new Error(`Error in deleteUser method: ${e.message}`);
