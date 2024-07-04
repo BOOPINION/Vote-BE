@@ -9,6 +9,7 @@ import { User, UserPersonalInfo } from "@/global/model/db/user";
         TypeOrmModule.forFeature([ User, UserPersonalInfo ])
     ],
     controllers: [ UserController ],
-    providers: [ UserService ]
+    providers: [ UserService ],
+    exports: [UserService]
 })
 export class UserModule {}

@@ -7,6 +7,7 @@ import { JwtAuthGuard } from "../../global/jwt-auth.guard";
 import { ChangePasswordRequestDto } from "./dto/changePasswordRequest.dto";
 import { ResetPasswordRequestDto } from "./dto/resetPasswordRequest.dto";
 import { SignupResponseDto } from "./dto/signupResponse.dto";
+import { LoginResponseDto } from './dto/loginResponse.dto';
 
 @Controller("auth")
 export class AuthController {
@@ -26,7 +27,7 @@ export class AuthController {
     @Post("/login")
     public async login(
         @Body() loginRequestDto: LoginRequestDto
-    ): Promise<{ accessToken: string }> {
+    ): Promise<LoginResponseDto> {
         try {
             return this.authService.login(loginRequestDto);
         } catch (e) {
@@ -38,7 +39,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     async changePassword(
         @Body() changePasswordRequestDto: ChangePasswordRequestDto
-    ): Promise<void> {
+    ): Promise< { success: boolean } > {
         try {
             return this.authService.changePassword(changePasswordRequestDto);
         } catch (e) {
@@ -62,7 +63,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     async deleteUser(
         @Body() deleteUserRequestDto: DeleteUserRequestDto
-    ): Promise<void> {
+    ): Promise< { success: boolean } > {
         try {
             return this.authService.deleteUser(deleteUserRequestDto);
         } catch (e) {

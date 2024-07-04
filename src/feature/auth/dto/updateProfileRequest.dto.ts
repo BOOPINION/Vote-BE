@@ -1,4 +1,5 @@
 export class UpdateProfileRequestDto {
-    email: string;
-    username?: string;
+    username: string;
+    gender: string;
+    age: number;
 }
