@@ -5,22 +5,23 @@ import { SurveyComment, SurveyLike } from "./survey-social";
 
 @Entity("SURVEY")
 export class Survey {
-    @PrimaryGeneratedColumn("increment", { name: "ID", type: "int"} )
-    id: number;
+    @PrimaryGeneratedColumn("increment", { name: "ID", type: "int" })
+        id: number;
 
     @Column({ name: "AUTHOR_ID", type: "int", nullable: false })
+        authorId: number;
 
     @Column({ name: "TITLE", type: "varchar", length: 255, nullable: false })
-    title: string;
+        title: string;
 
     @Column({ name: "CONTENT", type: "text", nullable: true })
-    content?: string;
+        content?: string;
 
     @Column({ name: "IS_DELETED", type: "boolean", nullable: false, default: false })
-    isDeleted: boolean;
+        isDeleted: boolean;
 
     @Column({ name: "CREATED_AT", type: "timestamp", nullable: false, default: () => "CURRENT_TIMESTAMP" })
-    createdAt: Date;
+        createdAt: Date;
 
     @Column({
         name: "LAST_MODIFIED_AT",
@@ -29,44 +30,44 @@ export class Survey {
         default: "CURRENT_TIMESTAMP",
         onUpdate: "CURRENT_TIMESTAMP"
     })
-    lastModifiedAt: Date;
+        lastModifiedAt: Date;
 
-    @ManyToOne(() => User, user => user.surveys)
+    @ManyToOne(() => User, (user) => user.surveys)
     @JoinColumn({ name: "AUTHOR_ID", referencedColumnName: "id" })
-    user: Relation<User>;
+        user: Relation<User>;
 
-    @OneToMany(() => SurveyOption, option => option.survey)
-    options: Relation<SurveyOption>[];
+    @OneToMany(() => SurveyOption, (option) => option.survey)
+        options: Relation<SurveyOption>[];
 
-    @OneToMany(() => SurveyAnswer, answer => answer.survey)
-    answers: Relation<SurveyAnswer>[];
+    @OneToMany(() => SurveyAnswer, (answer) => answer.survey)
+        answers: Relation<SurveyAnswer>[];
 
-    @OneToMany(() => SurveyHashtag, survey => survey.hashtags)
-    hashtags: Relation<SurveyHashtag>[];
+    @OneToMany(() => SurveyHashtag, (survey) => survey.survey)
+        hashtags: Relation<SurveyHashtag>[];
 
-    @OneToMany(() => SurveyLike, like => like.survey)
-    likes: Relation<SurveyLike>[];
+    @OneToMany(() => SurveyLike, (like) => like.survey)
+        likes: Relation<SurveyLike>[];
 
-    @OneToMany(() => SurveyComment, comment => comment.survey)
-    comments: Relation<SurveyComment>[];
+    @OneToMany(() => SurveyComment, (comment) => comment.survey)
+        comments: Relation<SurveyComment>[];
 }
 
 @Entity("SURVEY_OPTION")
 export class SurveyOption {
     @PrimaryGeneratedColumn("increment", { name: "ID", type: "int" })
-    id: number;
+        id: number;
 
     @Column({ name: "SURVEY_ID", type: "int", nullable: false })
-    surveyId: number;
+        surveyId: number;
 
     @Column({ name: "CONTENT", type: "text", nullable: false })
-    content: string;
+        content: string;
 
     @Column({ name: "IS_DELETED", type: "boolean", nullable: false, default: false })
-    isDeleted: boolean;
+        isDeleted: boolean;
 
     @Column({ name: "CREATED_AT", type: "timestamp", nullable: false, default: "CURRENT_TIMESTAMP" })
-    createdAt: Date;
+        createdAt: Date;
 
     @Column({
         name: "LAST_MODIFIED_AT",
@@ -75,42 +76,42 @@ export class SurveyOption {
         default: "CURRENT_TIMESTAMP",
         onUpdate: "CURRENT_TIMESTAMP"
     })
-    lastModifiedAt: Date;
+        lastModifiedAt: Date;
 
-    @ManyToOne(() => Survey, survey => survey.id)
+    @ManyToOne(() => Survey, (survey) => survey.id)
     @JoinColumn({ name: "SURVEY_ID", referencedColumnName: "id" })
-    survey: Relation<Survey>;
+        survey: Relation<Survey>;
 
-    @OneToMany(() => SurveyAnswer, answer => answer.option)
-    answers: Relation<SurveyAnswer>[];
+    @OneToMany(() => SurveyAnswer, (answer) => answer.option)
+        answers: Relation<SurveyAnswer>[];
 }
 
 @Entity("SURVEY_ANSWER")
 export class SurveyAnswer {
     @PrimaryGeneratedColumn("increment", { name: "ID", type: "int" })
-    id: number;
+        id: number;
 
     @Column({ name: "SURVEY_ID", type: "int", nullable: false })
-    surveyId: number;
+        surveyId: number;
 
     @Column({ name: "OPTION_ID", type: "int", nullable: false })
-    optionId: number;
+        optionId: number;
 
     @Column({ name: "USER_ID", type: "int", nullable: false })
-    userId: number;
+        userId: number;
 
     @Column({ name: "CREATED_AT", type: "timestamp", nullable: false, default: "CURRENT_TIMESTAMP" })
-    createdAt: Date;
+        createdAt: Date;
 
-    @ManyToOne(() => Survey, survey => survey.id)
+    @ManyToOne(() => Survey, (survey) => survey.id)
     @JoinColumn({ name: "SURVEY_ID", referencedColumnName: "id" })
-    survey: Relation<Survey>;
+        survey: Relation<Survey>;
 
-    @ManyToOne(() => SurveyOption, option => option.id)
+    @ManyToOne(() => SurveyOption, (option) => option.id)
     @JoinColumn({ name: "OPTION_ID", referencedColumnName: "id" })
-    option: Relation<SurveyOption>;
+        option: Relation<SurveyOption>;
 
-    @ManyToOne(() => User, user => user.id)
+    @ManyToOne(() => User, (user) => user.id)
     @JoinColumn({ name: "USER_ID", referencedColumnName: "id" })
-    user: Relation<User>;
+        user: Relation<User>;
 }

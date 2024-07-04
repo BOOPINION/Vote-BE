@@ -1,0 +1,20 @@
+PUT http://localhost:3000/api/votes/11/update
+Content-Type: application/json
+
+{
+  "title": "updatedTitle2",
+  "content": "hello world!!!",
+  "options": [
+    {
+      "id": 25,
+      "content": "updatedOption1"
+    },
+    {
+      "content": "newOption1"
+    },
+    {
+      "content": "newOption2"
+    }
+  ],
+  "hashtags": ["h2", "h1", "qwer"]
+}
