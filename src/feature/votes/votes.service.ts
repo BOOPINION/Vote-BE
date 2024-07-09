@@ -12,15 +12,15 @@ import { ZeroResultError } from "@/global/error/ZeroResultError";
 @Injectable()
 export class VotesService {
     constructor(private readonly db: DataSource) {}
-    public async getVotes(page: number = 1): Promise<Result<GetVotesResponseDto>> {
+    public async getVotes(page: number = 1, size: number = 10): Promise<Result<GetVotesResponseDto>> {
         const query = this.db.createQueryRunner();
 
         const connect = await doAsyncFp(query.connect.bind(query));
         if (!connect.success) return releaseWithError(query, new DatabaseError(connect.error.message));
 
         const surveys = await doAsyncFp(() => query.manager.find(Survey, {
-            skip: (page - 1) * 50,
-            take: 50,
+            skip: (page - 1) * size,
+            take: size,
             relations: {
                 hashtags: true,
                 user: true
