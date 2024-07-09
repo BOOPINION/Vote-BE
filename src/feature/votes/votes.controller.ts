@@ -13,8 +13,11 @@ export class VotesController {
     ) {}
 
     @Get()
-    public async getVotes(@Query("page") page?: number): Promise<GetVotesResponseDto> {
-        const result = await this.votesService.getVotes(page);
+    public async getVotes(
+        @Query("page") page?: number,
+            @Query("size") size?: number
+    ): Promise<GetVotesResponseDto> {
+        const result = await this.votesService.getVotes(page, size);
         if (!result.success) {
             const { error } = result;
             Logger.error(error);
